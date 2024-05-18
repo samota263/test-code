@@ -5,16 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CSV Chatbot</title>
     <style>
-        /* Add your CSS styles here */
+        /* Ajoutez vos styles CSS ici si nécessaire */
     </style>
 </head>
 <body>
     <div id="chat-container">
         <div id="chat-messages"></div>
-        <input type="text" id="user-input" placeholder="Ask me anything...">
-        <button onclick="sendQuestion()">Send</button>
+        <input type="text" id="user-input" placeholder="Posez-moi une question...">
+        <button onclick="sendQuestion()">Envoyer</button>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        let csvData;
+
+        fetch('data.csv')
+        .then(response => response.text())
+        .then(data => {
+            const rows = data.split('\n');
+            csvData = rows.map(row => row.split(','));
+            
+            // Appeler sendQuestion ici pour s'assurer que csvData est défini
+            sendQuestion();
+        })
+        .catch(error => console.error('Erreur lors du chargement du fichier CSV :', error));
+
+        function sendQuestion() {
+            var question = document.getElementById("user-input").value;
+            var answer = getAnswer(question);
+            displayAnswer(answer);
+        }
+
+        function getAnswer(question) {
+            let answer = '';
+            if (csvData) { // Vérifie si csvData est défini
+                for (let i = 0; i < csvData.length; i++) {
+                    if (csvData[i][0].toLowerCase() === question.toLowerCase()) {
+                        answer = csvData[i][1];
+                        break;
+                    }
+                }
+            }
+            return answer || "Désolé, je n'ai pas pu trouver les informations que vous recherchez.";
+        }
+
+        function displayAnswer(answer) {
+            var chatMessages = document.getElementById("chat-messages");
+            var messageElement = document.createElement("div");
+            messageElement.textContent = answer;
+            chatMessages.appendChild(messageElement);
+        }
+    </script>
 </body>
 </html>
